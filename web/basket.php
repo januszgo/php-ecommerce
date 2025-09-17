@@ -4,7 +4,7 @@ require 'config.php';
 if (!isset($_SESSION['basket'])) $_SESSION['basket'] = [];
 
 // Aktualizacja koszyka
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['quantities'])) {
     foreach ($_POST['quantities'] as $product_id => $qty) {
         $qty = (int)$qty;
         if ($qty <= 0) {
@@ -21,7 +21,7 @@ $products_in_basket = [];
 if (!empty($_SESSION['basket'])) {
     $ids = array_keys($_SESSION['basket']);
     $placeholders = implode(',', array_fill(0, count($ids), '?'));
-    $stmt = $pdo->prepare("SELECT * FROM ecommerce.products WHERE id IN ($placeholders)");
+    $stmt = $pdo->prepare("SELECT * FROM products WHERE id IN ($placeholders)");
     $stmt->execute($ids);
     $products_in_basket = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }

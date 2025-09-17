@@ -1,42 +1,40 @@
--- Utworzenie schematu
-CREATE SCHEMA IF NOT EXISTS ecommerce;
-
 -- Tabela użytkowników
-CREATE TABLE ecommerce.users (
-    id SERIAL PRIMARY KEY,
-    login VARCHAR(50) UNIQUE NOT NULL,
-    name VARCHAR(100) NOT NULL,
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    login TEXT UNIQUE NOT NULL,
+    name TEXT NOT NULL,
     password TEXT NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
-    phone VARCHAR(20),
+    email TEXT UNIQUE NOT NULL,
+    phone TEXT,
     address TEXT
 );
 
 -- Tabela produktów
-CREATE TABLE ecommerce.products (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
+CREATE TABLE IF NOT EXISTS products (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
     photo TEXT, -- link URL do zdjęcia
-    category VARCHAR(100),
-    price NUMERIC(10,2) NOT NULL CHECK (price >= 0),
-    amount INT DEFAULT 0 CHECK (amount >= 0),
-    available BOOLEAN DEFAULT TRUE
+    category TEXT,
+    price NUMERIC NOT NULL CHECK (price >= 0),
+    amount INTEGER DEFAULT 0 CHECK (amount >= 0),
+    available INTEGER DEFAULT 1 -- 1 = true, 0 = false
 );
 
 -- Tabela zamówień
-CREATE TABLE ecommerce.orders (
-    id SERIAL PRIMARY KEY,
-    uid UUID DEFAULT gen_random_uuid(), -- unikalny identyfikator zamówienia
-    user_id INT NOT NULL REFERENCES ecommerce.users(id) ON DELETE CASCADE,
-    products_list JSONB NOT NULL, -- lista produktów i ilości w formacie JSON
+CREATE TABLE IF NOT EXISTS orders (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    uid TEXT, -- można wygenerować UUID w PHP
+    user_id INTEGER NOT NULL,
+    products_list TEXT NOT NULL, -- JSON w formie tekstu
     date_of_order TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     date_of_shipping TIMESTAMP,
     date_of_delivery TIMESTAMP,
-    status VARCHAR(50) DEFAULT 'pending'
+    status TEXT DEFAULT 'pending',
+    FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- Dodatkowo: indeks po loginie użytkownika (często wyszukiwane)
-CREATE INDEX idx_users_login ON ecommerce.users(login);
+-- Indeks po loginie użytkownika
+CREATE INDEX IF NOT EXISTS idx_users_login ON users(login);
 
--- Dodatkowo: indeks po id produktów
-CREATE INDEX idx_products_id ON ecommerce.products(id);
+-- Indeks po id produktów
+CREATE INDEX IF NOT EXISTS idx_products_id ON products(id);
